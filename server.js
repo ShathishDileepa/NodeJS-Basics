@@ -1,21 +1,18 @@
-// lets create the same server using express
+// lets restructure the code using MVC architecture
+/*
+    Models      = All data related code goes here
+    Controllers = These are what user interact with to manipulate models, in express app these are usually route handlers
+    Views       = How we present our model data to the user, in express apps this is how we sent data back to the user (ex: in json format)
+*/
 
 const express = require("express");
+
+const friendsController = require("./controllers/friends.controller");
+const messagesController = require("./controllers/messages.controller");
 
 const PORT = 4000;
 
 const app = express();
-
-const friends = [
-  {
-    id: 0,
-    name: "Nikola Tesla",
-  },
-  {
-    id: 1,
-    name: "Sir Issac Newton",
-  },
-];
 
 // MIDDLEWARE ================================================
 
@@ -34,60 +31,12 @@ app.use(express.json());
 
 // METHODS ===================================================
 
-app.post("/friends", (req, res) => {
-  // in order to use req.body we have to use a middle ware that parses incoming json data
-  const friendName = req.body.name;
+app.post("/friends", friendsController.postFriends);
+app.get("/friends", friendsController.getFriends);
+app.get("/friends/:friendID", friendsController.getFriend);
 
-  if(!friendName){
-    res.status(400).json({
-        error:'missing friend name'
-    })
-    return
-  }
-
-  const newFriend = {
-    id: friends.length,
-    name: friendName,
-  };
-
-  friends.push(newFriend);
-
-  // echo back to user
-  res.json(newFriend);
-});
-
-app.get("/friends", (req, res) => {
-  // .json() is specially for sending json
-  res.status(200).json(friends);
-});
-
-app.get("/friends/:friendID", (req, res) => {
-  const { friendID } = req.params;
-  const friend = friends[Number(friendID)];
-
-  if (friend) {
-    res.json(friend);
-  } else {
-    // we will always send json response to the user
-    res.json({
-      error: `friend with id: ${friendID} does not exists`,
-    });
-  }
-});
-
-
-app.post('/messages',(req,res)=>{
-    console.log('updating messages...');
-    res,end()
-})
-
-app.get("/messages", (req, res) => {
-  res.send(
-    "<html><body><ul><li>Hello..!</li><li>How are you doing</li></ul></body></html>"
-  );
-});
-
-
+app.post("/messages", messagesController.postMessages);
+app.get("/messages", messagesController.getMessages);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}...`);
